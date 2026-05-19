@@ -1,0 +1,9 @@
+pandas
+numpy
+torch
+scikit-learn
+flask
+python-dotenv
+google-generativeai
+faker
+matplotlib

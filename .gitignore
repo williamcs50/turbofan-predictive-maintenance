@@ -1,0 +1,24 @@
+# Virtual environments
+venv/
+.venv/
+
+# Environment variables (contains your API key)
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Trained model weights
+*.pth
+*.pt
+
+# Generated data (large files)
+data/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
