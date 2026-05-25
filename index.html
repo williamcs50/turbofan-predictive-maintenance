@@ -159,6 +159,7 @@
 
     <section>
       <h2>Test Set Performance</h2>
+      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">Accuracy is misleading on imbalanced data — anomalies are rare, so predicting all-normal scores 99.8%. Precision and recall tell the real story.</p>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="label">Anomaly Accuracy</div>
@@ -199,9 +200,11 @@
     <section>
       <h2>Architecture</h2>
       <div class="note-banner">
-        3-layer Transformer encoder · 4 attention heads · sliding windows of 50 timesteps × 14 sensor features ·
-        sinusoidal positional encoding · global average pool · dual output heads (binary anomaly classification +
-        RUL regression) · weighted CrossEntropy for anomaly · MSE × 0.001 for RUL · joint training · 10 epochs
+        <strong style="color:#e2e8f0;">Encoder</strong> — 3-layer Transformer, 4 attention heads, sinusoidal positional encoding<br/>
+        <strong style="color:#e2e8f0;">Input</strong> — sliding windows of 50 timesteps × 14 sensor features<br/>
+        <strong style="color:#e2e8f0;">Pooling</strong> — global average pool over sequence dimension<br/>
+        <strong style="color:#e2e8f0;">Heads</strong> — binary anomaly classification (weighted CrossEntropy) + RUL regression (MSE × 0.001)<br/>
+        <strong style="color:#e2e8f0;">Training</strong> — joint loss, 10 epochs, Adam lr=0.0003
       </div>
     </section>
 
