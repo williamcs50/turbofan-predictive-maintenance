@@ -10,9 +10,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Trained model weights
-*.pth
-*.pt
+# Trained model weights and generated artifacts
+models/
 
 # Generated data (large files)
 data/
