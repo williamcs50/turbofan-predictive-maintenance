@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import torch
-from train_transformer import TransformerModel
-from integrate_llm import llm_enhance
+from modeling.train_transformer import TransformerModel
+from inference.integrate_llm import llm_enhance
 
 app = Flask(__name__)
 

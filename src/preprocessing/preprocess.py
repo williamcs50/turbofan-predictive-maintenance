@@ -2,11 +2,14 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import json
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent.parent.parent / 'data'
 
 # Load data
-df_sensors = pd.read_csv('synthetic_turbofan_sensors.csv')
+df_sensors = pd.read_csv(DATA_DIR / 'synthetic_turbofan_sensors.csv')
 
-with open('synthetic_maintenance_records.json', 'r') as f:
+with open(DATA_DIR / 'synthetic_maintenance_records.json', 'r') as f:
     records = json.load(f)
 
 df_records = pd.DataFrame(records)
@@ -50,7 +53,7 @@ train_df['rul'] = train_df['rul'].clip(upper=125)
 test_df['rul'] = test_df['rul'].clip(upper=125)
 print(f"Capped RUL range:   {train_df['rul'].min():.1f} - {train_df['rul'].max():.1f}")
 
-train_df.to_csv('train_sensors.csv', index=False)
-test_df.to_csv('test_sensors.csv', index=False)
+train_df.to_csv(DATA_DIR / 'train_sensors.csv', index=False)
+test_df.to_csv(DATA_DIR / 'test_sensors.csv', index=False)
 
 print("Preprocessing complete.")

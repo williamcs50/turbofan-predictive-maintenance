@@ -7,7 +7,11 @@ found in an MRO (maintenance, repair, overhaul) system.
 import json
 import random
 from datetime import datetime, timedelta
+from pathlib import Path
 from faker import Faker
+
+DATA_DIR = Path(__file__).parent.parent.parent / 'data'
+DATA_DIR.mkdir(exist_ok=True)
 
 fake = Faker()
 
@@ -97,7 +101,7 @@ if __name__ == '__main__':
         failure_mode = random.choice(FAILURE_MODES)
         all_records.extend(generate_records_for_engine(engine_id, num_cycles, failure_cycle, failure_mode))
 
-    with open('synthetic_maintenance_records.json', 'w') as f:
+    with open(DATA_DIR / 'synthetic_maintenance_records.json', 'w') as f:
         json.dump(all_records, f, indent=2)
 
     print(f"Generated {len(all_records)} maintenance records.")

@@ -6,6 +6,11 @@ import random
 
 from datetime import datetime, timedelta
 
+from pathlib import Path
+
+DATA_DIR = Path(__file__).parent.parent.parent / 'data'
+DATA_DIR.mkdir(exist_ok=True)
+
 # Define failure modes and their effects
 
 failure_modes = {
@@ -148,6 +153,6 @@ for i in range(1, 501):
 
 df_sensors = pd.concat(all_data)
 df_sensors = df_sensors.sort_values(['engine_id', 'cycle'])
-df_sensors.to_csv('synthetic_turbofan_sensors.csv', index=False)
+df_sensors.to_csv(DATA_DIR / 'synthetic_turbofan_sensors.csv', index=False)
 
 print(f"Generated {len(df_sensors)} rows for {len(all_data)} engines!")

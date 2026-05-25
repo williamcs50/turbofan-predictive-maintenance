@@ -7,6 +7,12 @@ import pandas as pd
 import numpy as np
 import math
 import os
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = ROOT / 'data'
+MODELS_DIR = ROOT / 'models'
+MODELS_DIR.mkdir(exist_ok=True)
 
 class EngineDataset(Dataset):
     """Time-series dataset of sliding windows over engine cycles."""
@@ -103,7 +109,7 @@ class TransformerModel(nn.Module):
 
 # Setup
 def main():
-    train_dataset = EngineDataset('train_sensors.csv')
+    train_dataset = EngineDataset(DATA_DIR / 'train_sensors.csv')
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 
@@ -134,7 +140,7 @@ def main():
 
     criterion_reg = nn.MSELoss()
 
-    model_path = 'transformer_model.pth'
+    model_path = MODELS_DIR / 'transformer_model.pth'
 
     if not os.path.exists(model_path):
         # train the model from scratch
@@ -178,7 +184,7 @@ def main():
 
     # Test Eval
     model.eval()
-    test_dataset = EngineDataset('test_sensors.csv')
+    test_dataset = EngineDataset(DATA_DIR / 'test_sensors.csv')
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     anom_preds, anom_true = [], []

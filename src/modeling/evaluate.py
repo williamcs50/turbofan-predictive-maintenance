@@ -3,17 +3,22 @@ import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 import matplotlib.pyplot as plt
 import numpy as np
-from train_transformer import EngineDataset, TransformerModel
+from modeling.train_transformer import EngineDataset, TransformerModel
 from torch.utils.data import DataLoader
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = ROOT / 'data'
+MODELS_DIR = ROOT / 'models'
 
 def main():
     # Load test loader
-    test_dataset = EngineDataset('test_sensors.csv')
+    test_dataset = EngineDataset(DATA_DIR / 'test_sensors.csv')
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
     input_dim = test_dataset.num_features
 
     # Load model
-    model_path = 'transformer_model.pth'
+    model_path = MODELS_DIR / 'transformer_model.pth'
 
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model checkpoint not found: {model_path}. " "Run train_transformer.py first.")
