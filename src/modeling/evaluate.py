@@ -3,7 +3,7 @@ import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 import matplotlib.pyplot as plt
 import numpy as np
-from modeling.train_transformer import EngineDataset, TransformerModel
+from train_transformer import EngineDataset, TransformerModel
 from torch.utils.data import DataLoader
 from pathlib import Path
 
