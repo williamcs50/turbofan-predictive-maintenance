@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 import torch
+from pathlib import Path
 from modeling.train_transformer import TransformerModel
 from inference.integrate_llm import llm_enhance
 
 app = Flask(__name__)
 
-MODEL_PATH = 'transformer_model.pth'
+MODEL_PATH = Path(__file__).parent.parent.parent / 'models' / 'transformer_model.pth'
 INPUT_DIM = 14
 
 if not torch.cuda.is_available():
