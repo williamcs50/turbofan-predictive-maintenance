@@ -4,6 +4,8 @@
 
 I built a predictive maintenance system for turbofan engines using Transformers that detect anomalies and predict remaining useful life (RUL). The system uses physics-based synthetic sensor data and maintenance logs, includes a Google Gemini-based explanation module for LLM-generated insights, and is served through a Flask API for prediction inference. I defined the system requirements and directed AI tools to scaffold and generate boilerplate code based on them, then I implemented, debugged, and integrated the components to complete training, evaluation, and deployment.
 
+**Build mode.** System design, model architecture, data pipeline, evaluation methodology, by me. AI used to accelerate implementation where hand-writing boilerplate wouldn't have taught me anything new. All code reviewed and integrated by me.
+
 ## Getting Started
 
 ### Requirements
