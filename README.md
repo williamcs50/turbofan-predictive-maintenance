@@ -104,3 +104,25 @@ Each engine represents a full time-series trajectory, and splitting is done at t
 The Transformer produces two outputs per window: an anomaly classification and an RUL estimate.
 
 Anomaly detection is evaluated using accuracy, precision, and recall computed from predicted labels via `argmax` over logits. RUL performance is evaluated using root mean squared error (RMSE) between predicted and true values across all test windows, reported in cycles.
+
+## Results
+
+[**Live dashboard**](https://williamcs50.github.io/turbofan-predictive-maintenance/)
+
+### Test Set Metrics
+
+| Metric | Value |
+|---|---|
+| Anomaly Accuracy | 0.9983 |
+| Precision | 0.0000 |
+| Recall | 0.0000 |
+| RUL RMSE | 41.72 cycles |
+
+Accuracy is high due to class imbalance — the model predicts all-normal across the test set. Precision and recall are the meaningful signal. Focal loss is the planned fix.
+
+### Anomaly Detection
+![Confusion matrix](./assets/confusion_matrix.png)
+
+### RUL Prediction
+![RUL scatter](./assets/rul_scatter.png)
+Predicted vs. true Remaining Useful Life across the test set. Diagonal shows perfect prediction.
