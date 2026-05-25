@@ -59,10 +59,10 @@ python src/modeling/train_transformer.py
 python src/modeling/evaluate.py
 
 # 5. Start the Flask inference API
-python src/inference/app.py
+PYTHONPATH=src python src/inference/app.py
 
 # 6. Run a sample inference with LLM enhancement
-python src/inference/integrate_llm.py
+PYTHONPATH=src python src/inference/integrate_llm.py
 ```
 
 ## Architecture
