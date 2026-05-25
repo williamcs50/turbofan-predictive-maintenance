@@ -5,6 +5,11 @@ from modeling.train_transformer import TransformerModel
 from google import genai
 from dotenv import load_dotenv
 import os
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = ROOT / 'data'
+MODELS_DIR = ROOT / 'models'
 
 load_dotenv()
 
@@ -52,10 +57,10 @@ def call_gemini(prompt: str) -> str:
         raise
 
 model = TransformerModel(input_dim=14)
-model.load_state_dict(torch.load('transformer_model.pth'))
+model.load_state_dict(torch.load(MODELS_DIR / 'transformer_model.pth'))
 model.eval()
 
-with open('synthetic_maintenance_records.json', 'r') as f:
+with open(DATA_DIR / 'synthetic_maintenance_records.json', 'r') as f:
     records = json.load(f)
 
 def get_logs(engine_id):
@@ -75,7 +80,7 @@ Refine the prediction: Output failure mode and adjusted RUL as JSON
 
     response_text = call_gemini(prompt)
     return response_text  
-df_test = pd.read_csv('test_sensors.csv')
+df_test = pd.read_csv(DATA_DIR / 'test_sensors.csv')
 
 sensor_cols = [
     'setting_1', 'setting_2',
