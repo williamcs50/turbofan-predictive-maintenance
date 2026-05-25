@@ -1,7 +1,7 @@
+import json
 import torch
 import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
-import matplotlib.pyplot as plt
 import numpy as np
 from train_transformer import EngineDataset, TransformerModel
 from torch.utils.data import DataLoader
@@ -54,17 +54,16 @@ def main():
     print(f"  Recall: {rec:.4f}")
     print(f"  RUL RMSE: {rmse:.2f} cycles")
 
-    # Simple visualization
-    plt.figure(figsize=(10,6))
-    plt.plot(rul_true[:100], label='True RUL', linewidth=1.5)
-    plt.plot(rul_pred[:100], label='Predicted RUL', linewidth=1.5, alpha=0.8)
-    plt.xlabel('Test Sample Index')
-    plt.ylabel('Remaining Useful Life (cycles)')
-    plt.title('True vs Predicted RUL (first 100 test samples)')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
+    predictions = {
+        'anom_true': [int(x) for x in anom_true],
+        'anom_pred': [int(x) for x in anom_pred],
+        'rul_true': [float(x) for x in rul_true],
+        'rul_pred': [float(x) for x in rul_pred],
+    }
+    out_path = MODELS_DIR / 'test_predictions.json'
+    with open(out_path, 'w') as f:
+        json.dump(predictions, f)
+    print(f"Predictions saved to {out_path}")
 
 if __name__ == '__main__':
     main()
