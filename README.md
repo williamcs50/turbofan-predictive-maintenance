@@ -6,6 +6,10 @@ I built a predictive maintenance system for turbofan engines using Transformers 
 
 **Build mode.** System design, model architecture, data pipeline, evaluation methodology, by me. AI used to accelerate implementation where hand-writing boilerplate wouldn't have taught me anything new. All code reviewed and integrated by me.
 
+## Why this project
+
+Predictive maintenance on jet engines is one of the most consequential real-world ML applications. The difference between scheduled maintenance and unplanned failure is measured in dollars and sometimes in lives. I wanted to understand the full pipeline end to end: synthetic data generation, sliding-window Transformer design, multi-task loss for joint anomaly and RUL prediction, deployment as an inference API, and an LLM layer for failure-mode interpretation. The internship work that inspired it was production scope. This is the educational version I could share publicly.
+
 ## Getting Started
 
 ### Requirements
