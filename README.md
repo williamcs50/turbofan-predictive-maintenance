@@ -58,10 +58,13 @@ python src/modeling/train_transformer.py
 # 4. Evaluate on the held-out test set
 python src/modeling/evaluate.py
 
-# 5. Start the Flask inference API
+# 5. Generate plots (saves PNGs to assets/)
+PYTHONPATH=src python src/visualization/generate_plots.py
+
+# 6. Start the Flask inference API
 PYTHONPATH=src python src/inference/app.py
 
-# 6. Run a sample inference with LLM enhancement
+# 7. Run a sample inference with LLM enhancement
 PYTHONPATH=src python src/inference/integrate_llm.py
 ```
 
