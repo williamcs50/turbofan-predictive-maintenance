@@ -159,7 +159,7 @@
 
     <section>
       <h2>Test Set Performance</h2>
-      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">Accuracy is misleading on imbalanced data — anomalies are rare, so predicting all-normal scores 99.8%. Precision and recall tell the real story.</p>
+      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">Both prediction heads collapsed during training. The anomaly head predicts all-normal across the test set (precision and recall both zero). The RUL head outputs a near-constant mean regardless of input (RMSE matches a trivial mean-baseline predictor). Both are being fixed in v0.2.0.</p>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="label">Anomaly Accuracy</div>
@@ -168,12 +168,12 @@
         <div class="metric-card">
           <div class="label">Precision</div>
           <div class="value">0.00</div>
-          <div class="note">Trivial classifier — predicts all-normal</div>
+          <div class="note">Trivial classifier. Predicts all-normal.</div>
         </div>
         <div class="metric-card">
           <div class="label">Recall</div>
           <div class="value">0.00</div>
-          <div class="note">Trivial classifier — predicts all-normal</div>
+          <div class="note">Trivial classifier. Predicts all-normal.</div>
         </div>
         <div class="metric-card">
           <div class="label">RUL RMSE</div>
@@ -188,11 +188,11 @@
       <div class="plots-grid">
         <div class="plot-card">
           <img src="assets/confusion_matrix.png" alt="Confusion matrix for anomaly detection" />
-          <div class="caption">Anomaly detection confusion matrix. High accuracy driven by class imbalance — the model predicts all-normal. Focal loss is the planned fix.</div>
+          <div class="caption">Anomaly detection confusion matrix. All predictions are normal class. The anomaly head collapsed during training. Focal loss (v0.2.0) is the planned fix.</div>
         </div>
         <div class="plot-card">
           <img src="assets/rul_scatter.png" alt="RUL prediction scatter plot" />
-          <div class="caption">Predicted vs. true Remaining Useful Life across the test set. Diagonal shows perfect prediction.</div>
+          <div class="caption">Predicted vs. true Remaining Useful Life across the test set. The horizontal cluster shows the regression head collapsed to outputting a near-constant mean. Predictions do not vary with input. Diagonal would show perfect prediction.</div>
         </div>
       </div>
     </section>
