@@ -116,16 +116,23 @@ Anomaly detection is evaluated using accuracy, precision, and recall computed fr
 
 | Metric | Value |
 |---|---|
-| Anomaly Accuracy | 0.9983 |
-| Precision | 0.0000 |
-| Recall | 0.0000 |
-| RUL RMSE | 41.72 cycles |
+| Anomaly Accuracy | 0.9983 (trivial) |
+| Anomaly Precision | 0.0000 (collapsed) |
+| Anomaly Recall | 0.0000 (collapsed) |
+| RUL RMSE | 41.72 cycles (mean-baseline) |
 
-Accuracy is high due to class imbalance — the model predicts all-normal across the test set. Precision and recall are the meaningful signal. Focal loss is the planned fix.
+Both prediction heads collapsed during training. These numbers are not meaningful model performance; they are the starting point for the v0.2.0 fix described below.
+
+**Anomaly classification head collapse.** The model predicts all-normal across the entire test set, producing 99.83% accuracy via the ~5% anomaly base rate. Weighted cross-entropy with class weights was insufficient to overcome the imbalance at training time. Precision and recall are both zero. Planned fix: replace weighted cross-entropy with focal loss (gamma=2), which down-weights easy negatives and forces the model to attend to hard anomaly examples.
+
+**RUL regression head collapse.** The regression head outputs a near-constant ~78 cycles regardless of input, matching the training-set mean. The joint loss objective weighted RUL loss at 0.001, which starved the regression head of gradient signal during training. The anomaly head dominated and the RUL head learned nothing. RMSE of 41.72 cycles matches a trivial mean-baseline predictor. Planned fix: rebalance the joint loss weighting (sweep values 0.01, 0.1, 1.0) to restore meaningful gradient flow to the regression head.
+
+Both fixes will be addressed in v0.2.0.
 
 ### Anomaly Detection
 ![Confusion matrix](./assets/confusion_matrix.png)
+All predictions are normal class. The confusion matrix reflects the collapsed anomaly head, not meaningful classification.
 
 ### RUL Prediction
 ![RUL scatter](./assets/rul_scatter.png)
-Predicted vs. true Remaining Useful Life across the test set. Diagonal shows perfect prediction.
+Predicted vs. true Remaining Useful Life across the test set. The horizontal cluster shows the regression head collapsed to outputting a near-constant mean. Predictions do not vary with input. Diagonal would show perfect prediction.
