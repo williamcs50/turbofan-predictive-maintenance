@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import Dataset, DataLoader
@@ -7,6 +8,7 @@ import pandas as pd
 import numpy as np
 import math
 import os
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
@@ -107,6 +109,18 @@ class TransformerModel(nn.Module):
 
         return anom_out, rul_out
 
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=None, gamma=2.0):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+
+    def forward(self, logits, targets):
+        ce = F.cross_entropy(logits, targets, reduction='none', weight=self.alpha)
+        pt = torch.exp(-ce)
+        focal = ((1 - pt) ** self.gamma) * ce
+        return focal.mean()
+
 # Setup
 def main():
     train_dataset = EngineDataset(DATA_DIR / 'train_sensors.csv')
@@ -126,9 +140,7 @@ def main():
     # Clip extreme class weights to avoid gradient instability
     class_weights = np.clip(class_weights, 0, 50)
 
-    weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
-
-    print(f"Class weights => Normal: {class_weights[0]:.2f}, Anomaly: {class_weights[1]:.2f}")
+    print(f"Class weights (not used) => Normal: {class_weights[0]:.2f}, Anomaly: {class_weights[1]:.2f}")
 
     # Model and optimizer
 
@@ -136,7 +148,7 @@ def main():
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0003)
 
-    criterion_class = nn.CrossEntropyLoss(weight=weights_tensor)
+    criterion_class = FocalLoss(gamma=2.0)
 
     criterion_reg = nn.MSELoss()
 
@@ -145,6 +157,8 @@ def main():
     if not os.path.exists(model_path):
         # train the model from scratch
         print("Training the model from scratch....")
+
+        epoch_losses = []
 
         for epoch in range(10):
 
@@ -160,9 +174,9 @@ def main():
 
                 loss_class = criterion_class(anom_pred, anom)
 
-                loss_reg = criterion_reg(rul_pred.squeeze(), rul)
+                loss_reg = criterion_reg(rul_pred.squeeze(), rul / 125.0)
 
-                loss = loss_class + 0.001 * loss_reg
+                loss = loss_class + 0.1 * loss_reg
 
                 loss.backward()
 
@@ -170,11 +184,18 @@ def main():
 
                 total_loss += loss.item()
 
-            print(f"Epoch {epoch+1}: Avg Loss {total_loss / len(train_loader):.4f}")
+            avg_loss = total_loss / len(train_loader)
+            epoch_losses.append(avg_loss)
+            print(f"Epoch {epoch+1}: Avg Loss {avg_loss:.4f}")
 
-        # Save once after all epochs
+        # Save model and loss history
         torch.save(model.state_dict(), model_path)
         print(f"Model saved to {model_path}")
+
+        history_path = MODELS_DIR / 'training_history.json'
+        with open(history_path, 'w') as f:
+            json.dump({'epoch_losses': epoch_losses}, f)
+        print(f"Loss history saved to {history_path}")
 
     else:
         print(f"Loading saved model: {model_path}")
@@ -196,7 +217,7 @@ def main():
             anom_pred = torch.argmax(anom_logits, dim=1)
             anom_preds.extend(anom_pred.cpu().numpy())
             anom_true.extend(anom.cpu().numpy())
-            rul_preds.extend(rul_pred.cpu().numpy())
+            rul_preds.extend((rul_pred * 125.0).cpu().numpy())
             rul_true.extend(rul.cpu().numpy())
 
     acc = accuracy_score(anom_true, anom_preds)
