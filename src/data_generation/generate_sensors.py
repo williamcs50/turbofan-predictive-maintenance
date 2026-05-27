@@ -99,7 +99,7 @@ def generate_engine_data(engine_id, num_cycles, failure_cycle, failure_mode):
 
         
 
-        anomaly = 1 if vibration > 0.05 or T50 > 1420 else 0  # Thresholds based on real specs
+        anomaly = 1 if rul <= 30 else 0  # Thresholds based on real specs
 
         failed = 1 if cycle == failure_cycle else 0
 

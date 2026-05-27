@@ -38,7 +38,7 @@ def main():
             anom_pred.extend(anom_p)
             anom_true.extend(anom.cpu().numpy())
 
-            rul_p = rul_out.squeeze(-1).cpu().numpy()
+            rul_p = (rul_out.squeeze(-1) * 125.0).cpu().numpy()
             rul_pred.extend(rul_p)
             rul_true.extend(rul.cpu().numpy())
 
