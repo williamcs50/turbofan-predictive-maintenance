@@ -15,17 +15,26 @@ DATA_DIR.mkdir(exist_ok=True)
 
 failure_modes = {
 
-    'High-pressure turbine wear': {'vib_increase': 0.002, 'temp_increase': 0.5, 'start_degrade': 50},
+    'High-pressure turbine wear': {'start_degrade': 50},
 
     'Compressor stall': {'press_drop': 0.1, 'start_degrade': 30},
 
     'Main bearing failure': {'vib_increase': 0.003, 'start_degrade': 40},
 
-    'Foreign object damage': {'abrupt_vib_spike': 0.1, 'start_degrade': 20},  # Sudden
+    'Foreign object damage': {'abrupt_vib_spike': 0.1, 'start_degrade': 20},
 
     'Overheating': {'temp_increase': 1.0, 'start_degrade': 60}
 
 }
+
+# Noise stds match the generation distributions below.
+# SNR = degradation_delta / noise_std; each affected channel reaches TARGET_SNR_EOL at RUL=0.
+SENSOR_NOISE_STD = {
+    'vibration': 0.005 / np.sqrt(12),  # uniform(0, 0.005)
+    'T50': 5.0,                         # normal(0, 5)
+    'P30': 2.0,                         # normal(0, 2)
+}
+TARGET_SNR_EOL = 4.0
 
 def generate_engine_data(engine_id, num_cycles, failure_cycle, failure_mode):
 
@@ -77,13 +86,25 @@ def generate_engine_data(engine_id, num_cycles, failure_cycle, failure_mode):
 
         # Apply degradation
 
-        if cycle > degrade_start:
+        if failure_mode == 'High-pressure turbine wear':
+
+            # Vibration leads: ramp starts 50 cycles before failure
+            if rul <= 50:
+                vibration += TARGET_SNR_EOL * SENSOR_NOISE_STD['vibration'] * (50 - rul) / 50
+
+            # T50 and P30 follow: ramp starts at the label window boundary
+            if rul <= 30:
+                t_factor = (30 - rul) / 30
+                T50 += TARGET_SNR_EOL * SENSOR_NOISE_STD['T50'] * t_factor
+                P30 -= TARGET_SNR_EOL * SENSOR_NOISE_STD['P30'] * t_factor
+
+        elif cycle > degrade_start:
 
             deg_factor = (cycle - degrade_start) / params['start_degrade']
 
             if 'vib_increase' in params:
 
-                vibration += params['vib_increase'] * deg_factor ** 2  # Quadratic wear
+                vibration += params['vib_increase'] * deg_factor ** 2
 
             if 'temp_increase' in params:
 
@@ -95,7 +116,7 @@ def generate_engine_data(engine_id, num_cycles, failure_cycle, failure_mode):
 
             if 'abrupt_vib_spike' in params and cycle == failure_cycle - 10:
 
-                vibration += params['abrupt_vib_spike']  # Sudden event
+                vibration += params['abrupt_vib_spike']
 
         
 
