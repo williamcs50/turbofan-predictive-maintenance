@@ -45,12 +45,15 @@ GEMINI_API_KEY=your-api-key-here
 The pipeline runs in stages: generate synthetic data, preprocess, train, evaluate, serve.
 
 ```bash
-# 1. Generate synthetic sensor data and maintenance logs
-python src/data_generation/generate_sensors.py
+# 1. Generate synthetic sensor data (v2 — 5-channel, SNR-scaled)
+python src/data_generation/generate_sensors_v2.py
 python src/data_generation/generate_logs.py
 
 # 2. Preprocess into model-ready windows
 python src/preprocessing/preprocess.py
+
+# 2a. Verify learnability (gate reads preprocessed data; all modes must clear 0.76 before training)
+python scripts/run_gate.py
 
 # 3. Train the Transformer model
 python src/modeling/train_transformer.py

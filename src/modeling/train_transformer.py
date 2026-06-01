@@ -26,9 +26,10 @@ class EngineDataset(Dataset):
 
         sensor_cols = [
             col for col in df.columns
-            if any(kw in col.lower() for kw in [
-                'temp', 'pressure', 'speed', 'vibration', 'setting', 'epr', 'ps30', 'farb'
-            ])
+            if col not in [
+                'engine_id', 'cycle', 'timestamp', 'anomaly_label',
+                'failure_label', 'rul', 'failure_mode', 'num_records'
+            ]
         ]
         self.num_features = len(sensor_cols)
 
