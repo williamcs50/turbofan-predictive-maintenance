@@ -1,7 +1,7 @@
 """
 Learnability gate — reads from preprocessed train/test CSVs (same data path
 the Transformer sees). Fits a plain logistic regression on windowed signal
-channels and prints per-mode recall. If a mode clears 0.80, its signal survives
+channels and prints per-mode recall. If a mode clears 0.76, its signal survives
 the full preprocessing pipeline.
 """
 
