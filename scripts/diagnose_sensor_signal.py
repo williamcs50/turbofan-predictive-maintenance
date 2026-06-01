@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 DATA_DIR = ROOT / 'data'
 
-ENGINE_ID = 'ENG_001'
+ENGINE_ID = 'ENG_003'
 SENSORS = ['vibration', 'T50_total_temp', 'P30_total_pressure']
 
 raw_df = pd.read_csv(DATA_DIR / 'synthetic_turbofan_sensors.csv')
@@ -34,7 +34,7 @@ print(f"Engine: {ENGINE_ID} | Failure mode: {failure_mode}")
 print(f"Total cycles: {max_cycle} | Anomaly window starts at cycle: {anomaly_start_cycle}")
 print(f"Anomaly proportion: {eng_raw['anomaly_label'].mean():.1%}")
 
-fig, axes = plt.subplots(len(SENSORS), 2, figsize=(14, 4 * len(SENSORS)), sharey='row')
+fig, axes = plt.subplots(len(SENSORS), 2, figsize=(14, 4 * len(SENSORS)))
 fig.suptitle(f"{ENGINE_ID} — {failure_mode}\nRed shading = RUL≤30 anomaly window", fontsize=13)
 
 for row, sensor in enumerate(SENSORS):

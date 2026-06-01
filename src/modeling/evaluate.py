@@ -65,5 +65,18 @@ def main():
         json.dump(predictions, f)
     print(f"Predictions saved to {out_path}")
 
+    assets_dir = ROOT / 'assets'
+    assets_dir.mkdir(exist_ok=True)
+    metrics = {
+        'accuracy': round(acc, 4),
+        'precision': round(prec, 4),
+        'recall': round(rec, 4),
+        'rul_rmse': round(rmse, 2),
+    }
+    metrics_path = assets_dir / 'metrics.json'
+    with open(metrics_path, 'w') as f:
+        json.dump(metrics, f, indent=2)
+    print(f"Metrics saved to {metrics_path}")
+
 if __name__ == '__main__':
     main()

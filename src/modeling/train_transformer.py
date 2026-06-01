@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
-from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 import numpy as np
@@ -26,9 +25,10 @@ class EngineDataset(Dataset):
 
         sensor_cols = [
             col for col in df.columns
-            if any(kw in col.lower() for kw in [
-                'temp', 'pressure', 'speed', 'vibration', 'setting', 'epr', 'ps30', 'farb'
-            ])
+            if col not in [
+                'engine_id', 'cycle', 'timestamp', 'anomaly_label',
+                'failure_label', 'rul', 'failure_mode', 'num_records'
+            ]
         ]
         self.num_features = len(sensor_cols)
 
@@ -129,20 +129,7 @@ def main():
 
     input_dim = train_dataset.num_features
 
-    # Compute class weights since anomalies are rare
-    labels = [anom.item() for _, anom, _ in train_dataset]
-    class_weights = compute_class_weight(
-            class_weight='balanced',
-            classes=np.array([0, 1]),
-            y=np.array(labels),
-        )
-    
-    # Clip extreme class weights to avoid gradient instability
-    class_weights = np.clip(class_weights, 0, 50)
-
-    print(f"Class weights (not used) => Normal: {class_weights[0]:.2f}, Anomaly: {class_weights[1]:.2f}")
-
-    # Model and optimizer
+    # Model and optimizer      
 
     model = TransformerModel(input_dim=input_dim)
 

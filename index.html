@@ -150,7 +150,7 @@
 
   <header>
     <h1>Turbofan Predictive Maintenance</h1>
-    <p>3-layer Transformer encoder · 500 synthetic engines · dual-head anomaly + RUL &nbsp;|&nbsp;
+    <p>3-layer Transformer encoder · 50 synthetic engines · dual-head anomaly + RUL &nbsp;|&nbsp;
       <a href="https://github.com/williamcs50/turbofan-predictive-maintenance">View source</a>
     </p>
   </header>
@@ -159,25 +159,23 @@
 
     <section>
       <h2>Test Set Performance</h2>
-      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">Both prediction heads collapsed during training. The anomaly head predicts all-normal across the test set (precision and recall both zero). The RUL head outputs a near-constant mean regardless of input (RMSE matches a trivial mean-baseline predictor). Both are being fixed in v0.2.0.</p>
+      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">v0.2 — SNR-scaled synthetic data, focal loss (γ=2), 5-channel sensor set. v0.1 baseline: both heads collapsed (precision/recall 0.00, RUL RMSE 41.7 cycles mean-predictor).</p>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="label">Anomaly Accuracy</div>
-          <div class="value">99.8%</div>
+          <div class="value" id="m-accuracy">—</div>
         </div>
         <div class="metric-card">
           <div class="label">Precision</div>
-          <div class="value">0.00</div>
-          <div class="note">Trivial classifier. Predicts all-normal.</div>
+          <div class="value" id="m-precision">—</div>
         </div>
         <div class="metric-card">
           <div class="label">Recall</div>
-          <div class="value">0.00</div>
-          <div class="note">Trivial classifier. Predicts all-normal.</div>
+          <div class="value" id="m-recall">—</div>
         </div>
         <div class="metric-card">
           <div class="label">RUL RMSE</div>
-          <div class="value">41.7</div>
+          <div class="value" id="m-rmse">—</div>
           <div class="note">cycles</div>
         </div>
       </div>
@@ -188,11 +186,11 @@
       <div class="plots-grid">
         <div class="plot-card">
           <img src="assets/confusion_matrix.png" alt="Confusion matrix for anomaly detection" />
-          <div class="caption">Anomaly detection confusion matrix. All predictions are normal class. The anomaly head collapsed during training. Focal loss (v0.2.0) is the planned fix.</div>
+          <div class="caption">Anomaly detection confusion matrix. v0.2 trained with focal loss (γ=2) on SNR-scaled data.</div>
         </div>
         <div class="plot-card">
           <img src="assets/rul_scatter.png" alt="RUL prediction scatter plot" />
-          <div class="caption">Predicted vs. true Remaining Useful Life across the test set. The horizontal cluster shows the regression head collapsed to outputting a near-constant mean. Predictions do not vary with input. Diagonal would show perfect prediction.</div>
+          <div class="caption">Predicted vs. true Remaining Useful Life across the test set. Diagonal indicates perfect prediction.</div>
         </div>
       </div>
     </section>
@@ -201,9 +199,9 @@
       <h2>Architecture</h2>
       <div class="note-banner">
         <strong style="color:#e2e8f0;">Encoder</strong> — 3-layer Transformer, 4 attention heads, sinusoidal positional encoding<br/>
-        <strong style="color:#e2e8f0;">Input</strong> — sliding windows of 50 timesteps × 14 sensor features<br/>
+        <strong style="color:#e2e8f0;">Input</strong> — sliding windows of 50 timesteps × 5 sensor features<br/>
         <strong style="color:#e2e8f0;">Pooling</strong> — global average pool over sequence dimension<br/>
-        <strong style="color:#e2e8f0;">Heads</strong> — binary anomaly classification (weighted CrossEntropy) + RUL regression (MSE × 0.001)<br/>
+        <strong style="color:#e2e8f0;">Heads</strong> — binary anomaly classification (focal loss γ=2) + RUL regression (MSE × 0.1)<br/>
         <strong style="color:#e2e8f0;">Training</strong> — joint loss, 10 epochs, Adam lr=0.0003
       </div>
     </section>
@@ -214,6 +212,22 @@
     Built by <a href="https://github.com/williamcs50">William Opyrchal</a> ·
     <a href="https://github.com/williamcs50/turbofan-predictive-maintenance">GitHub</a>
   </footer>
+
+  <script>
+    fetch('assets/metrics.json')
+      .then(r => r.json())
+      .then(m => {
+        document.getElementById('m-accuracy').textContent =
+          (m.accuracy * 100).toFixed(1) + '%';
+        document.getElementById('m-precision').textContent =
+          m.precision.toFixed(2);
+        document.getElementById('m-recall').textContent =
+          m.recall.toFixed(2);
+        document.getElementById('m-rmse').textContent =
+          m.rul_rmse.toFixed(1);
+      })
+      .catch(() => {});
+  </script>
 
 </body>
 </html>
