@@ -1,0 +1,11 @@
+{
+  "threshold": 0.22,
+  "accuracy": 0.3715,
+  "precision": 0.3339,
+  "recall": 0.9957,
+  "f1": 0.5001,
+  "FN": 13,
+  "FP": 5958,
+  "total_cost": 6608,
+  "rul_rmse": 8.92
+}
