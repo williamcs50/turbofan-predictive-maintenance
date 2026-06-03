@@ -2,7 +2,7 @@
 
 ## Overview
 
-I built a predictive maintenance system for turbofan engines using Transformers that detect anomalies and predict remaining useful life (RUL). The system uses physics-based synthetic sensor data and maintenance logs, includes a Google Gemini-based explanation module for LLM-generated insights, and is served through a Flask API for prediction inference. I defined the system requirements and directed AI tools to scaffold and generate boilerplate code based on them, then I implemented, debugged, and integrated the components to complete training, evaluation, and deployment.
+I built a predictive maintenance system for turbofan engines using Transformers that detect anomalies and predict remaining useful life (RUL). The system uses SNR-scaled synthetic sensor data and maintenance logs, includes a Google Gemini-based explanation module for LLM-generated insights, and is served through a Flask API for prediction inference. I defined the system requirements and directed AI tools to scaffold and generate boilerplate code based on them, then I implemented, debugged, and integrated the components to complete training, evaluation, and deployment.
 
 **Build mode.** System design, model architecture, data pipeline, evaluation methodology, by me. AI used to accelerate implementation where hand-writing boilerplate wouldn't have taught me anything new. All code reviewed and integrated by me.
 
@@ -97,7 +97,7 @@ The anomaly head is trained with focal loss (gamma=2) to handle class imbalance 
 
 3. The LLM Layer
 
-The system includes a Google Gemini based module for refining and interpreting model outputs. It takes the model's anomaly probability, predicted RUL, and up to five maintenance log descriptions for the same engine.
+The system includes a Google Gemini-based module for refining and interpreting model outputs. It takes the model's anomaly probability, predicted RUL, and up to five maintenance log descriptions for the same engine.
 
 These inputs are combined into a structured prompt that asks the model to infer a likely failure mode and produce an adjusted RUL estimate in JSON format. JSON output is enforced using `response_mime_type: "application/json"` in the API configuration, ensuring structured responses.
 
@@ -122,7 +122,7 @@ Anomaly detection is evaluated using precision, recall, and asymmetric cost (50�
 | Metric | v0.2.0 (t=0.50) | v0.2.1 (t\*=0.22) |
 |---|---|---|
 | Anomaly Precision | 0.9591 | 0.3339 |
-| Anomaly Recall | 0.80 | 0.9957 |
+| Anomaly Recall | 0.8047 | 0.9957 |
 | FN (missed failures) | 586 | 13 |
 | Total Cost (50·FN + FP) | 29,403 | 6,608 (−78%) |
 | RUL RMSE | 8.92 cycles | 8.92 cycles |
