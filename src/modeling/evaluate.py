@@ -1,5 +1,6 @@
 import json
 import torch
+import torch.nn.functional as F
 import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 import numpy as np
@@ -34,7 +35,8 @@ def main():
     with torch.no_grad():
         for seq, anom, rul in test_loader:
             anom_logits, rul_out = model(seq)
-            anom_p = torch.argmax(anom_logits, dim=1).cpu().numpy()
+            probs = F.softmax(anom_logits, dim=1)[:, 1].cpu().numpy()
+            anom_p = (probs >= 0.22).astype(int)
             anom_pred.extend(anom_p)
             anom_true.extend(anom.cpu().numpy())
 
@@ -43,16 +45,22 @@ def main():
             rul_true.extend(rul.cpu().numpy())
 
     # Metrics
-    acc = accuracy_score(anom_true, anom_pred)
-    prec = precision_score(anom_true, anom_pred, zero_division=0)
-    rec = recall_score(anom_true, anom_pred, zero_division=0)
+    anom_true_arr = np.array(anom_true)
+    anom_pred_arr = np.array(anom_pred)
+    acc = accuracy_score(anom_true_arr, anom_pred_arr)
+    prec = precision_score(anom_true_arr, anom_pred_arr, zero_division=0)
+    rec = recall_score(anom_true_arr, anom_pred_arr, zero_division=0)
     rmse = np.sqrt(mean_squared_error(rul_true, rul_pred))
-    
-    print("Transformer Test Metrics:")
-    print(f"  Accuracy: {acc:.4f}")
-    print(f"  Precision: {prec:.4f}")
-    print(f"  Recall: {rec:.4f}")
-    print(f"  RUL RMSE: {rmse:.2f} cycles")
+    fn = int(((anom_pred_arr == 0) & (anom_true_arr == 1)).sum())
+    fp = int(((anom_pred_arr == 1) & (anom_true_arr == 0)).sum())
+    cost = 50 * fn + fp
+
+    print("Transformer Test Metrics (t*=0.22, r=50):")
+    print(f"  Accuracy:    {acc:.4f}")
+    print(f"  Precision:   {prec:.4f}")
+    print(f"  Recall:      {rec:.4f}")
+    print(f"  FN:          {fn}  FP: {fp}  total_cost: {cost}")
+    print(f"  RUL RMSE:    {rmse:.2f} cycles")
 
     predictions = {
         'anom_true': [int(x) for x in anom_true],
@@ -68,9 +76,13 @@ def main():
     assets_dir = ROOT / 'assets'
     assets_dir.mkdir(exist_ok=True)
     metrics = {
-        'accuracy': round(acc, 4),
+        'threshold': 0.22,
+        'cost_ratio': 50,
         'precision': round(prec, 4),
         'recall': round(rec, 4),
+        'fn': fn,
+        'fp': fp,
+        'total_cost': cost,
         'rul_rmse': round(rmse, 2),
     }
     metrics_path = assets_dir / 'metrics.json'
