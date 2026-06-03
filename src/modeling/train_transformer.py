@@ -110,13 +110,12 @@ class TransformerModel(nn.Module):
         return anom_out, rul_out
 
 class FocalLoss(nn.Module):
-    def __init__(self, alpha=None, gamma=2.0):
+    def __init__(self, gamma=2.0):
         super().__init__()
-        self.alpha = alpha
         self.gamma = gamma
 
     def forward(self, logits, targets):
-        ce = F.cross_entropy(logits, targets, reduction='none', weight=self.alpha)
+        ce = F.cross_entropy(logits, targets, reduction='none')
         pt = torch.exp(-ce)
         focal = ((1 - pt) ** self.gamma) * ce
         return focal.mean()
@@ -185,7 +184,8 @@ def main():
         print(f"Loss history saved to {history_path}")
 
     else:
-        print(f"Loading saved model: {model_path}")
+        print(f"WARNING: skipping training — loaded saved model from {model_path}")
+        print("         Delete models/transformer_model.pth to retrain from scratch.")
         model.load_state_dict(torch.load(model_path))
 
     print("Training Complete!")

@@ -57,6 +57,8 @@ python scripts/run_gate.py
 
 # 3. Train the Transformer model
 python src/modeling/train_transformer.py
+# If models/transformer_model.pth already exists, training is skipped and the saved model is loaded.
+# Delete that file to retrain from scratch.
 
 # 4. Evaluate on the held-out test set
 python src/modeling/evaluate.py
