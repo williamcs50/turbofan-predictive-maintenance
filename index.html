@@ -159,19 +159,22 @@
 
     <section>
       <h2>Test Set Performance</h2>
-      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;">v0.2 — SNR-scaled synthetic data, focal loss (γ=2), 5-channel sensor set. v0.1 baseline: both heads collapsed (precision/recall 0.00, RUL RMSE 41.7 cycles mean-predictor).</p>
+      <p style="font-size:0.85rem;color:#64748b;margin-bottom:1rem;" id="perf-subtitle">Loading…</p>
       <div class="metrics-grid">
         <div class="metric-card">
-          <div class="label">Anomaly Accuracy</div>
-          <div class="value" id="m-accuracy">—</div>
-        </div>
-        <div class="metric-card">
-          <div class="label">Precision</div>
-          <div class="value" id="m-precision">—</div>
+          <div class="label">Total Cost</div>
+          <div class="value" id="m-cost">—</div>
+          <div class="note" id="m-cost-note">r·FN + FP</div>
         </div>
         <div class="metric-card">
           <div class="label">Recall</div>
           <div class="value" id="m-recall">—</div>
+          <div class="note">FN: <span id="m-fn">—</span></div>
+        </div>
+        <div class="metric-card">
+          <div class="label">Precision</div>
+          <div class="value" id="m-precision">—</div>
+          <div class="note">FP: <span id="m-fp">—</span></div>
         </div>
         <div class="metric-card">
           <div class="label">RUL RMSE</div>
@@ -185,8 +188,12 @@
       <h2>Plots</h2>
       <div class="plots-grid">
         <div class="plot-card">
+          <img src="assets/precision_recall_curve.png" alt="Precision-recall curve with operating point" />
+          <div class="caption" id="cap-pr">Precision-recall curve (validation set). Loading…</div>
+        </div>
+        <div class="plot-card">
           <img src="assets/confusion_matrix.png" alt="Confusion matrix for anomaly detection" />
-          <div class="caption">Anomaly detection confusion matrix. v0.2 trained with focal loss (γ=2) on SNR-scaled data.</div>
+          <div class="caption" id="cap-cm">Confusion matrix. Loading…</div>
         </div>
         <div class="plot-card">
           <img src="assets/rul_scatter.png" alt="RUL prediction scatter plot" />
@@ -217,14 +224,30 @@
     fetch('assets/metrics.json')
       .then(r => r.json())
       .then(m => {
-        document.getElementById('m-accuracy').textContent =
-          (m.accuracy * 100).toFixed(1) + '%';
-        document.getElementById('m-precision').textContent =
-          m.precision.toFixed(2);
+        const t = m.threshold.toFixed(2);
+        const r = m.cost_ratio;
+
+        document.getElementById('perf-subtitle').textContent =
+          `t*=${t}, cost ratio r=${r} (${r}·FN + FP). Threshold selected by sweeping validation set; numbers below are held-out test set.`;
+
+        document.getElementById('m-cost').textContent =
+          m.total_cost.toLocaleString();
+        document.getElementById('m-cost-note').textContent =
+          `${r}·FN + FP`;
         document.getElementById('m-recall').textContent =
-          m.recall.toFixed(2);
+          m.recall.toFixed(4);
+        document.getElementById('m-fn').textContent = m.fn;
+        document.getElementById('m-precision').textContent =
+          m.precision.toFixed(4);
+        document.getElementById('m-fp').textContent =
+          m.fp.toLocaleString();
         document.getElementById('m-rmse').textContent =
           m.rul_rmse.toFixed(1);
+
+        document.getElementById('cap-pr').textContent =
+          `Precision-recall curve (validation set). Red dot: t*=${t}, cost-minimizing operating point under r=${r}. Orange diamond: default t=0.50.`;
+        document.getElementById('cap-cm').textContent =
+          `Confusion matrix at t*=${t}. ${(m.recall * 100).toFixed(1)}% recall, ${m.fn} missed failures, ${m.fp.toLocaleString()} false positives.`;
       })
       .catch(() => {});
   </script>

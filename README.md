@@ -109,7 +109,7 @@ Each engine represents a full time-series trajectory, and splitting is done at t
 
 The Transformer produces two outputs per window: an anomaly classification and an RUL estimate.
 
-Anomaly detection is evaluated using accuracy, precision, and recall computed from predicted labels via `argmax` over logits. RUL performance is evaluated using root mean squared error (RMSE) between predicted and true values across all test windows, reported in cycles.
+Anomaly detection is evaluated using precision, recall, and asymmetric cost (50·FN + FP) at the cost-optimal threshold t\*=0.22, selected by sweeping the validation set under cost ratio r=50 (a missed failure costs ~50× a false alarm in this domain). RUL performance is evaluated using root mean squared error (RMSE) between predicted and true values across all test windows, reported in cycles.
 
 ## Results
 
@@ -117,18 +117,24 @@ Anomaly detection is evaluated using accuracy, precision, and recall computed fr
 
 ### Test Set Metrics
 
-| Metric | Value |
-|---|---|
-| Anomaly Accuracy | 0.9275 |
-| Anomaly Precision | 0.9591 |
-| Anomaly Recall | 0.8047 |
-| RUL RMSE | 8.92 cycles |
+| Metric | v0.2.0 (t=0.50) | v0.2.1 (t\*=0.22) |
+|---|---|---|
+| Anomaly Precision | 0.9591 | 0.3339 |
+| Anomaly Recall | 0.80 | 0.9957 |
+| FN (missed failures) | 586 | 13 |
+| Total Cost (50·FN + FP) | 29,403 | 6,608 (−78%) |
+| RUL RMSE | 8.92 cycles | 8.92 cycles |
 
-In v0.1, both prediction heads collapsed: the anomaly head predicted all-normal (precision/recall 0.00) and the RUL head output a near-constant mean (RMSE 41.72 cycles). v0.2 addresses both by replacing the synthetic data generator with an SNR-scaled design that puts degradation above the sensor noise floor for all five failure modes, replacing weighted cross-entropy with focal loss (gamma=2), and raising the RUL joint loss weight from 0.001 to 0.1.
+In v0.1, both prediction heads collapsed: the anomaly head predicted all-normal (precision/recall 0.00) and the RUL head output a near-constant mean (RMSE 41.72 cycles). v0.2.0 addresses both by replacing the synthetic data generator with an SNR-scaled design that puts degradation above the sensor noise floor for all five failure modes, replacing weighted cross-entropy with focal loss (gamma=2), and raising the RUL joint loss weight from 0.001 to 0.1.
+
+v0.2.1 corrects the operating point. v0.2.0 defaulted to argmax (t=0.50), which optimizes balanced accuracy — the wrong objective for this domain. A threshold sweep on the validation set under cost ratio r=50 identified t\*=0.22 as the cost-minimizing operating point. At t\*=0.22, missed failures drop from 586 to 13 and total cost falls 78%, at the expected trade-off of lower precision (0.96 → 0.33). The RUL head is untouched.
 
 ### Anomaly Detection
+![Precision-recall curve](./assets/precision_recall_curve.png)
+Precision-recall curve on the validation set. Red dot: t\*=0.22, the cost-minimizing operating point under r=50. Orange diamond: default t=0.50 for comparison.
+
 ![Confusion matrix](./assets/confusion_matrix.png)
-Anomaly detection confusion matrix. 2414 true positives, 586 false negatives (20% miss rate), 103 false alarms. Precision 0.96, recall 0.80.
+Confusion matrix at t\*=0.22. 2987 true positives, 13 false negatives (0.4% miss rate), 5958 false positives. The high FP count is the explicit cost of near-zero misses under r=50.
 
 ### RUL Prediction
 ![RUL scatter](./assets/rul_scatter.png)
