@@ -1,3 +1,4 @@
+import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +7,8 @@ from pathlib import Path
 from sklearn.metrics import confusion_matrix
 
 ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / 'src' / 'modeling'))
+from config import ANOMALY_THRESHOLD
 MODELS_DIR = ROOT / 'models'
 ASSETS_DIR = ROOT / 'assets'
 ASSETS_DIR.mkdir(exist_ok=True)
@@ -61,22 +64,24 @@ def plot_precision_recall_curve():
         data = json.load(f)
 
     sweep   = data['sweep']
-    t_star  = data['t_star']
     default = data['default_05']
 
     recall    = [r['recall']    for r in sweep]
     precision = [r['precision'] for r in sweep]
 
+    # Find the sweep row matching the current operating threshold from config
+    t_row = min(sweep, key=lambda r: abs(r['threshold'] - ANOMALY_THRESHOLD))
+
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.plot(recall, precision, color='steelblue', linewidth=2, label='PR curve (val)')
 
     ax.scatter(
-        [t_star['recall']], [t_star['precision']],
+        [t_row['recall']], [t_row['precision']],
         color='red', s=120, zorder=5,
         label=(
-            f"t*={t_star['threshold']:.2f}  "
-            f"P={t_star['precision']:.2f}  R={t_star['recall']:.2f}  "
-            f"cost={t_star['total_cost']}"
+            f"t*={t_row['threshold']:.2f}  "
+            f"P={t_row['precision']:.2f}  R={t_row['recall']:.2f}  "
+            f"F1={t_row['f1']:.2f}"
         ),
     )
 
