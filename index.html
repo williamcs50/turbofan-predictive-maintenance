@@ -228,7 +228,7 @@
         const r = m.cost_ratio;
 
         document.getElementById('perf-subtitle').textContent =
-          `t*=${t}, cost ratio r=${r} (${r}·FN + FP). Threshold selected by sweeping validation set; numbers below are held-out test set.`;
+          `t*=${t}, cost ratio r=${r} (${r}·FN + FP). Distributed-SNR data. Threshold selected by sweeping validation set for max F1; numbers below are held-out test set.`;
 
         document.getElementById('m-cost').textContent =
           m.total_cost.toLocaleString();
@@ -245,7 +245,7 @@
           m.rul_rmse.toFixed(1);
 
         document.getElementById('cap-pr').textContent =
-          `Precision-recall curve (validation set). Red dot: t*=${t}, cost-minimizing operating point under r=${r}. Orange diamond: default t=0.50.`;
+          `Precision-recall curve (validation set). Red dot: t*=${t}, max-F1 operating point on distributed-SNR data. Orange diamond: default t=0.50.`;
         document.getElementById('cap-cm').textContent =
           `Confusion matrix at t*=${t}. ${(m.recall * 100).toFixed(1)}% recall, ${m.fn} missed failures, ${m.fp.toLocaleString()} false positives.`;
       })

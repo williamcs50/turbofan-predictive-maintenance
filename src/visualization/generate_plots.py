@@ -53,7 +53,11 @@ def plot_rul_scatter():
 
 
 def plot_precision_recall_curve():
-    with open(MODELS_DIR / 'sweep_results.json') as f:
+    sweep_path = MODELS_DIR / 'sweep_results.json'
+    if not sweep_path.exists():
+        print("Skipping precision-recall curve — sweep_results.json not found. Run: PYTHONPATH=src python src/modeling/threshold_sweep.py")
+        return
+    with open(sweep_path) as f:
         data = json.load(f)
 
     sweep   = data['sweep']
