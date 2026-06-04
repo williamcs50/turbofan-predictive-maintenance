@@ -30,7 +30,7 @@ CYCLES           = 1000
 DEGRADE_FRACTION = 0.30                   # signal injected over the last 30% of life
 TARGET_SNR_EOL   = 4.0                    # primary channel reaches this SNR at RUL=0
 SECONDARY_SNR    = 2.0                    # secondary channels are weaker on purpose
-DISTRIBUTED      = False                  # flip to True for the spread-signal design
+DISTRIBUTED      = True                  # flip to True for the spread-signal design
 
 # Sensor baselines and noise std-devs. SNR is defined per channel as delta / noise_std.
 SENSORS = {

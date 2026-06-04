@@ -49,22 +49,22 @@ def run_gate():
     clf.fit(Xtr_z, ytr)
     pred = clf.predict(Xte_z)
 
-    print(f"  base rate (anomaly fraction): {yte.mean():.2f}")
-    print(f"  overall  precision {precision_score(yte, pred):.2f}  "
-          f"recall {recall_score(yte, pred):.2f}  f1 {f1_score(yte, pred):.2f}")
+    print(f"  base rate (anomaly fraction): {yte.mean():.4f}")
+    print(f"  overall  precision {precision_score(yte, pred):.4f}  "
+          f"recall {recall_score(yte, pred):.4f}  f1 {f1_score(yte, pred):.4f}")
     print("  per-mode recall:")
     for m in sorted(set(mte)):
         sel = mte == m
         r = recall_score(yte[sel], pred[sel], zero_division=0)
         flag = "PASS" if r >= RECALL_BAR else "fail"
-        print(f"    {m:22s} recall {r:.2f}   n={sel.sum():5d}  [{flag}]")
+        print(f"    {m:22s} recall {r:.4f}   n={sel.sum():5d}  [{flag}]")
 
     best = 0.0
     for j in range(Xte_z.shape[1]):
         thr = np.quantile(Xtr_z[ytr == 0, j], 0.90)
         naive = (Xte_z[:, j] > thr).astype(int)
         best = max(best, f1_score(yte, naive, zero_division=0))
-    print(f"  best single-threshold f1 (naive baseline): {best:.2f}")
+    print(f"  best single-threshold f1 (naive baseline): {best:.4f}")
 
 
 if __name__ == "__main__":

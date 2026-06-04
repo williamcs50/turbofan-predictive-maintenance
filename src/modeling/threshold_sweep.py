@@ -11,12 +11,10 @@ ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(Path(__file__).parent))
 
 from train_transformer import EngineDataset, TransformerModel
+from config import COST_FN, COST_FP
 
 DATA_DIR = ROOT / 'data'
 MODELS_DIR = ROOT / 'models'
-
-COST_FN = 50
-COST_FP = 1
 VAL_FRAC = 0.2
 
 
