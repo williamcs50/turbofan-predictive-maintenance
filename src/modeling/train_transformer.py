@@ -9,6 +9,7 @@ import math
 import os
 import json
 from pathlib import Path
+from config import ANOMALY_THRESHOLD
 
 ROOT = Path(__file__).parent.parent.parent
 DATA_DIR = ROOT / 'data'
@@ -202,7 +203,7 @@ def main():
         for seq, anom, rul in test_loader:
             anom_logits, rul_pred = model(seq)
             probs = F.softmax(anom_logits, dim=1)[:, 1].cpu().numpy()
-            anom_pred = (probs >= 0.22).astype(int)
+            anom_pred = (probs >= ANOMALY_THRESHOLD).astype(int)
             anom_preds.extend(anom_pred)
             anom_true.extend(anom.cpu().numpy())
             rul_preds.extend((rul_pred * 125.0).cpu().numpy())
@@ -213,7 +214,7 @@ def main():
     rec = recall_score(anom_true, anom_preds, zero_division=0)
     rmse = np.sqrt(mean_squared_error(rul_true, rul_preds))
 
-    print("\nTest set performance (t*=0.22, r=50):")
+    print(f"\nTest set performance (t*={ANOMALY_THRESHOLD}, r=50):")
     print(f" Anomaly Accuracy : {acc:.4f}")
     print(f" Precision        : {prec:.4f}")
     print(f" Recall           : {rec:.4f}")

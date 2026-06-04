@@ -5,6 +5,7 @@ import os
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 import numpy as np
 from train_transformer import EngineDataset, TransformerModel
+from config import ANOMALY_THRESHOLD, COST_FN, COST_FP
 from torch.utils.data import DataLoader
 from pathlib import Path
 
@@ -36,7 +37,7 @@ def main():
         for seq, anom, rul in test_loader:
             anom_logits, rul_out = model(seq)
             probs = F.softmax(anom_logits, dim=1)[:, 1].cpu().numpy()
-            anom_p = (probs >= 0.22).astype(int)
+            anom_p = (probs >= ANOMALY_THRESHOLD).astype(int)
             anom_pred.extend(anom_p)
             anom_true.extend(anom.cpu().numpy())
 
@@ -53,9 +54,9 @@ def main():
     rmse = np.sqrt(mean_squared_error(rul_true, rul_pred))
     fn = int(((anom_pred_arr == 0) & (anom_true_arr == 1)).sum())
     fp = int(((anom_pred_arr == 1) & (anom_true_arr == 0)).sum())
-    cost = 50 * fn + fp
+    cost = COST_FN * fn + COST_FP * fp
 
-    print("Transformer Test Metrics (t*=0.22, r=50):")
+    print(f"Transformer Test Metrics (t*={ANOMALY_THRESHOLD}, r=50):")
     print(f"  Accuracy:    {acc:.4f}")
     print(f"  Precision:   {prec:.4f}")
     print(f"  Recall:      {rec:.4f}")
@@ -76,7 +77,7 @@ def main():
     assets_dir = ROOT / 'assets'
     assets_dir.mkdir(exist_ok=True)
     metrics = {
-        'threshold': 0.22,
+        'threshold': ANOMALY_THRESHOLD,
         'cost_ratio': 50,
         'precision': round(prec, 4),
         'recall': round(rec, 4),
