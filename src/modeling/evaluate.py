@@ -2,7 +2,8 @@ import json
 import torch
 import torch.nn.functional as F
 import os
-from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
+import pandas as pd
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error
 import numpy as np
 from train_transformer import EngineDataset, TransformerModel
 from config import ANOMALY_THRESHOLD, COST_FN, COST_FP
@@ -14,9 +15,17 @@ DATA_DIR = ROOT / 'data'
 MODELS_DIR = ROOT / 'models'
 
 def main():
-    # Load test loader
     test_dataset = EngineDataset(DATA_DIR / 'test_sensors.csv')
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+    # Build per-window failure modes in the same groupby order EngineDataset uses
+    test_df = pd.read_csv(DATA_DIR / 'test_sensors.csv')
+    window_modes = []
+    for _, group in test_df.groupby('engine_id'):
+        mode = group['failure_mode'].iloc[0]
+        n_windows = len(group) - test_dataset.sequence_length
+        window_modes.extend([mode] * n_windows)
+    window_modes = np.array(window_modes)
     input_dim = test_dataset.num_features
 
     # Load model
@@ -56,12 +65,20 @@ def main():
     fp = int(((anom_pred_arr == 1) & (anom_true_arr == 0)).sum())
     cost = COST_FN * fn + COST_FP * fp
 
+    f1 = f1_score(anom_true_arr, anom_pred_arr, zero_division=0)
+
     print(f"Transformer Test Metrics (t*={ANOMALY_THRESHOLD}, r=50):")
     print(f"  Accuracy:    {acc:.4f}")
     print(f"  Precision:   {prec:.4f}")
     print(f"  Recall:      {rec:.4f}")
+    print(f"  F1:          {f1:.4f}")
     print(f"  FN:          {fn}  FP: {fp}  total_cost: {cost}")
     print(f"  RUL RMSE:    {rmse:.2f} cycles")
+    print(f"  Per-mode recall:")
+    for mode in sorted(set(window_modes)):
+        sel = window_modes == mode
+        r = recall_score(anom_true_arr[sel], anom_pred_arr[sel], zero_division=0)
+        print(f"    {mode:22s} recall {r:.4f}   n={sel.sum():5d}")
 
     predictions = {
         'anom_true': [int(x) for x in anom_true],

@@ -63,7 +63,10 @@ python src/modeling/train_transformer.py
 # 4. Evaluate on the held-out test set
 python src/modeling/evaluate.py
 
-# 5. Generate plots (saves PNGs to assets/)
+# 5. Run threshold sweep (required before generate_plots.py — produces sweep_results.json for the PR curve)
+PYTHONPATH=src python src/modeling/threshold_sweep.py
+
+# 5a. Generate plots (saves PNGs to assets/)
 PYTHONPATH=src python src/visualization/generate_plots.py
 
 # 6. Start the Flask inference API

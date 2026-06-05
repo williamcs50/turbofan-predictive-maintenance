@@ -1,11 +1,14 @@
+import sys
 import json
 import torch
 import pandas as pd
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / 'modeling'))
+
 from modeling.train_transformer import TransformerModel
 from google import genai
 from dotenv import load_dotenv
 import os
-from pathlib import Path
 
 ROOT = Path(__file__).parent.parent.parent
 DATA_DIR = ROOT / 'data'
@@ -56,7 +59,7 @@ def call_gemini(prompt: str) -> str:
         # Do NOT touch `response` here; it might not exist
         raise
 
-model = TransformerModel(input_dim=14)
+model = TransformerModel(input_dim=5)
 model.load_state_dict(torch.load(MODELS_DIR / 'transformer_model.pth'))
 model.eval()
 
@@ -82,14 +85,7 @@ Refine the prediction: Output failure mode and adjusted RUL as JSON
     return response_text  
 df_test = pd.read_csv(DATA_DIR / 'test_sensors.csv')
 
-sensor_cols = [
-    'setting_1', 'setting_2',
-    'T2_total_temp', 'T24_total_temp', 'T30_total_temp', 'T50_total_temp',
-    'P15_static_pressure', 'P30_total_pressure',
-    'nf_fan_speed', 'nc_core_speed', 'epr_engine_pressure_ratio',
-    'ps30_static_pressure', 'farb_fuel_air_ratio_burner',
-    'vibration'
-]
+sensor_cols = ['vibration', 'T50', 'P30', 'Nf', 'fuel_flow']
 
 # Take first sequence (50 timesteps)
 sample_seq = df_test.iloc[0:50][sensor_cols].values
