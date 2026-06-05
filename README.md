@@ -63,7 +63,7 @@ python src/modeling/train_transformer.py
 # 4. Evaluate on the held-out test set
 python src/modeling/evaluate.py
 
-# 5. Run threshold sweep (required before generate_plots.py — produces sweep_results.json for the PR curve)
+# 5. Run threshold sweep (required before generate_plots.py; produces sweep_results.json for the PR curve)
 PYTHONPATH=src python src/modeling/threshold_sweep.py
 
 # 5a. Generate plots (saves PNGs to assets/)
@@ -132,15 +132,17 @@ Anomaly detection is evaluated using precision, recall, and asymmetric cost (50�
 
 In v0.1, both prediction heads collapsed: the anomaly head predicted all-normal (precision/recall 0.00) and the RUL head output a near-constant mean (RMSE 41.72 cycles). v0.2.0 addresses both by replacing the synthetic data generator with an SNR-scaled design that puts degradation above the sensor noise floor for all five failure modes, replacing weighted cross-entropy with focal loss (gamma=2), and raising the RUL joint loss weight from 0.001 to 0.1.
 
-v0.2.1 corrects the operating point. v0.2.0 defaulted to argmax (t=0.50), which optimizes balanced accuracy — the wrong objective for this domain. A threshold sweep on the validation set under cost ratio r=50 identified t\*=0.22 as the cost-minimizing operating point. At t\*=0.22, missed failures drop from 586 to 13 and total cost falls 78%, at the expected trade-off of lower precision (0.96 → 0.33). The RUL head is untouched.
+v0.2.1 corrects the operating point. v0.2.0 defaulted to argmax (t=0.50), which optimizes balanced accuracy, the wrong objective for this domain. A threshold sweep on the validation set under cost ratio r=50 identified t\*=0.22 as the cost-minimizing operating point. At t\*=0.22, missed failures drop from 586 to 13 and total cost falls 78%, at the expected trade-off of lower precision (0.96 → 0.33). The RUL head is untouched.
+
+The plots below reflect the distributed-SNR experiment (v0.3 direction). The metrics table above reflects v0.2.1 at the concentrated-SNR operating point.
 
 ### Anomaly Detection
 ![Precision-recall curve](./assets/precision_recall_curve.png)
-Precision-recall curve on the validation set. Red dot: t\*=0.22, the cost-minimizing operating point under r=50. Orange diamond: default t=0.50 for comparison.
+Precision-recall curve on the validation set (distributed-SNR). Red dot: t\*=0.43, the F1-optimal operating point. Orange diamond: default t=0.50 for comparison.
 
 ![Confusion matrix](./assets/confusion_matrix.png)
-Confusion matrix at t\*=0.22. 2987 true positives, 13 false negatives (0.4% miss rate), 5958 false positives. The high FP count is the explicit cost of near-zero misses under r=50.
+Confusion matrix at t\*=0.43 (distributed-SNR). 2239 true positives, 761 false negatives (25.4% miss rate), 215 false positives.
 
 ### RUL Prediction
 ![RUL scatter](./assets/rul_scatter.png)
-Predicted vs. true Remaining Useful Life across the test set. Points track the diagonal; RMSE 8.92 cycles. Error near RUL=0 is small. The vertical band at true RUL=125 is a clipping artifact.
+Predicted vs. true Remaining Useful Life across the test set (distributed-SNR). RMSE 10.89 cycles. The vertical band at true RUL=125 is a clipping artifact.
