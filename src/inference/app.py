@@ -1,13 +1,16 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / 'modeling'))
+
 from flask import Flask, request, jsonify
 import torch
-from pathlib import Path
 from modeling.train_transformer import TransformerModel
 from inference.integrate_llm import llm_enhance
 
 app = Flask(__name__)
 
 MODEL_PATH = Path(__file__).parent.parent.parent / 'models' / 'transformer_model.pth'
-INPUT_DIM = 14
+INPUT_DIM = 5
 
 if not torch.cuda.is_available():
     print("Warning: Running on CPU — performance may be limited.")
